@@ -1,4 +1,4 @@
-package main
+package util
 
 import (
 	"../util"
@@ -94,7 +94,7 @@ func (goodTuring GoodTuring) getData() map[string]float64 {
 func (goodTuring GoodTuring) get(key string) float64 {
 	if !goodTuring.handled {
 		goodTuring.handled = true
-		result := util.Calc(goodTuring.Data)
+		result := Calc(goodTuring.Data)
 		if f, ok := result[0].(float64); ok {
 			goodTuring.None = f
 		}
@@ -113,7 +113,7 @@ func (goodTuring GoodTuring) get(key string) float64 {
 }
 
 type Normal struct {
-	BaseProb
+	Base
 }
 
 func (normal Normal) add(key string, value int) {

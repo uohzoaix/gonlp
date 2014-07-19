@@ -1,8 +1,4 @@
-package prob
-
-import (
-	"fmt"
-)
+package util
 
 type TnT struct {
 	num           int
@@ -37,8 +33,8 @@ func (tnt TnT) getNum() int {
 	return tnt.num
 }
 
-func main() {
-	tnt := TnT{}
-	tnt = tnt.init(10)
-	fmt.Println(tnt.getNum())
-}
+//func main() {
+//	tnt := TnT{}
+//	tnt = tnt.init(10)
+//	fmt.Println(tnt.getNum())
+//}

@@ -41,3 +41,31 @@ func (memFile MemFile) saveToFile(data map[string]interface{}, fname string) {
 	ret, _ := json.Marshal(data)
 	fout.Write([]byte(ret))
 }
+
+func (memFile MemFile) loadFromFile(fname string, obj interface{}) []byte {
+	fin, err := os.Open(fname)
+	defer fin.Close()
+	if err != nil {
+		fmt.Println(fname, err)
+		return
+	}
+	var result, temp []byte
+	var beginPos int
+	buf := make([]byte, 2048*10000)
+	for {
+		num, _ := fin.Read(buf)
+		if 0 == num {
+			break
+		}
+		if len(result) > 0 {
+			temp = result
+			result = make([]byte, beginPos+num)
+			copy(result[0:len(temp)], temp[:])
+		} else {
+			result = make([]byte, num)
+		}
+		copy(result[beginPos:beginPos+num], buf[:num])
+		//os.Stdout.Write(buf[:num])
+	}
+	return result
+}

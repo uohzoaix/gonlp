@@ -69,3 +69,28 @@ func (memFile MemFile) loadFromFile(fname string, obj interface{}) []byte {
 	}
 	return result
 }
+
+func (memFile MemFile) loadToMem(result []byte, obj interface{}) {
+	data := make(map[string]interface{})
+	json.Unmarshal(result, data)
+	t = reflect.TypeOf(test)
+	v = reflect.ValueOf(&test).Elem()
+	for key, val := range data {
+		for i := 0; i < t.NumField(); i++ {
+			f := t.Field(i)
+			if f.Name == key {
+				field := v.FieldByName(key)
+				if field.IsValid() {
+					if field.CanSet() {
+						if field.Kind() == reflect.String {
+							field.Set(reflect.ValueOf(val.(string)))
+						} else if field.Kind() == reflect.Slice {
+							field.Set(reflect.ValueOf(val.([]string)))
+						}
+					}
+				}
+				break
+			}
+		}
+	}
+}

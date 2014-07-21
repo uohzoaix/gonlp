@@ -12,7 +12,7 @@ type TnT struct {
 	trans         map[interface{}]float64
 }
 
-func (tnt TnT) init(num int) TnT {
+func (tnt *TnT) NewTnT(num int) TnT {
 	tnt.num = num
 	tnt.l1 = 0.0
 	tnt.l2 = 0.0
@@ -31,6 +31,18 @@ func (tnt TnT) init(num int) TnT {
 
 func (tnt TnT) getNum() int {
 	return tnt.num
+}
+
+func (tnt *TnT) save(fname string) {
+	MemFile.loadFromMem(fname, tnt)
+}
+
+func (tnt *TnT) load(fname string) {
+	result := MemFile.loadFromFile(fname, tnt)
+	if result != nil {
+		//MemFile.loadToMem(result, tnt)
+		json.Unmarshal(result, &tnt)
+	}
 }
 
 //func main() {

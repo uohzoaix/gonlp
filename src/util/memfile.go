@@ -1,8 +1,10 @@
 package util
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"reflect"
 	"unsafe"
@@ -70,6 +72,7 @@ func (memFile MemFile) loadFromFile(fname string, obj interface{}) []byte {
 	return result
 }
 
+//TODO:field.set改为调用struct的set方法
 func (memFile MemFile) loadToMem(result []byte, obj interface{}) {
 	data := make(map[string]interface{})
 	json.Unmarshal(result, data)
@@ -93,4 +96,35 @@ func (memFile MemFile) loadToMem(result []byte, obj interface{}) {
 			}
 		}
 	}
+}
+
+func (memFile MemFile) bayesLoadToMem(result []byte, obj interface{}) {
+
+}
+
+func (memFile *MemFile) getReader(fileName string) (*os.File, *bufio.Reader) {
+	file, err := os.Open(fileName)
+	if err != nil {
+		return nil
+	}
+	return file, bufio.NewReader(file)
+}
+
+func (memFile *MemFile) readFile(reader *bufio.Reader, handle func(string)) error {
+	if reader != nil {
+		for {
+			line, isPrefix, err := reader.ReadLine()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				return err
+			}
+			if isPrefix {
+				return errors.New("Error: unexcepted long line.")
+			}
+			handle(string(line))
+		}
+	}
+	return nil
 }

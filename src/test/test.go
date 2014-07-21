@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"reflect"
 	"unsafe"
@@ -11,6 +14,14 @@ import (
 type Test struct {
 	Name  string
 	Teles []string
+}
+
+func (test *Test) SetName(name string) {
+	test.Name = name
+}
+
+func (test *Test) SetTeles(teles []string) {
+	test.Teles = teles
 }
 
 func main() {
@@ -46,4 +57,103 @@ func main() {
 	ret, _ := json.Marshal(test)
 	fout.Write([]byte(ret))
 
+	fin, err := os.Open(fname)
+	defer fin.Close()
+	if err != nil {
+		fmt.Println(fname, err)
+		return
+	}
+	var result, temp []byte
+	var beginPos int
+	buf := make([]byte, 2048*10000)
+	for {
+		num, _ := fin.Read(buf)
+		if 0 == num {
+			break
+		}
+		if len(result) > 0 {
+			temp = result
+			result = make([]byte, beginPos+num)
+			copy(result[0:len(temp)], temp[:])
+		} else {
+			result = make([]byte, num)
+		}
+		copy(result[beginPos:beginPos+num], buf[:num])
+		//os.Stdout.Write(buf[:num])
+	}
+	//fmt.Println(result)
+	testfunc(ret, test)
+
+	data := make(map[string]interface{})
+	var testinter interface{}
+	testinter = test
+	json.Unmarshal([]byte(ret), &testinter)
+	fmt.Println("testinter", testinter)
+	t = reflect.TypeOf(test)
+	v = reflect.ValueOf(&test).Elem()
+	for key, val := range data {
+		for i := 0; i < t.NumField(); i++ {
+			f := t.Field(i)
+			if f.Name == key {
+				field := v.FieldByName(key)
+				if field.IsValid() {
+					if field.CanSet() {
+						if field.Kind() == reflect.String {
+							field.Set(reflect.ValueOf(val.(string)))
+						} else if field.Kind() == reflect.Slice {
+							val, ok := val.([]interface{})
+							if ok {
+							}
+							fmt.Println(ok, val)
+						}
+					}
+				}
+				break
+			}
+		}
+	}
+	fmt.Println(test.Teles)
+
+}
+
+func testfunc(bytes []byte, obj Test) (err error) {
+	json.Unmarshal([]byte(bytes), &obj)
+	fmt.Println("obj", obj.Name)
+	file, reader := getReader("testfile.txt")
+	defer file.Close()
+	err = readFile(reader, func(line string) {
+		if len(line) > 0 {
+			//runes := utils.ToRunes(line)
+			//dict[runes[0]] = runes[0]
+			fmt.Println(line)
+		}
+	})
+	return
+}
+
+func getReader(fileName string) (*os.File, *bufio.Reader) {
+	file, err := os.Open(fileName)
+	if err != nil {
+		return nil, nil
+	}
+	return file, bufio.NewReader(file)
+}
+
+func readFile(reader *bufio.Reader, handle func(string)) error {
+	if reader != nil {
+		for {
+			line, isPrefix, err := reader.ReadLine()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				return err
+			}
+			if isPrefix {
+				return errors.New("Error: unexcepted long line.")
+			}
+			handle(string(line))
+		}
+	}
+	return nil
 }

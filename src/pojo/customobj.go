@@ -58,13 +58,17 @@ func (tag Tag) GetPre() Pre {
 func (tag Tag) GetScore() float64 {
 	return tag.score
 }
-func (tag Tag) GetSuffix() string {
+func (tag Tag) Suffix() string {
 	return tag.suffix
 }
 
 type WordTag struct {
 	word string
 	tag  string
+}
+
+func InitWT(word string, tag string) *WordTag {
+	return &WordTag{word, tag}
 }
 
 func (wordTag WordTag) GetWord() string {

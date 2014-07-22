@@ -3,17 +3,17 @@ package util
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"reflect"
-	"unsafe"
 )
 
 type MemFile struct {
 }
 
-func (memFile MemFile) loadFromMem(fname string, tnt TnT) {
+func loadFromMem(fname string, tnt *TnT) {
 	//data := make(map[string]interface{})
 	//t := reflect.TypeOf(obj)
 	//v := reflect.ValueOf(obj)
@@ -30,10 +30,10 @@ func (memFile MemFile) loadFromMem(fname string, tnt TnT) {
 	//		data[f.Name] = val
 	//	}
 	//}
-	memFile.saveToFile(tnt, fname)
+	saveToFile(&tnt, fname)
 }
 
-func (memFile MemFile) saveToFile(obj interface{}, fname string) {
+func saveToFile(obj interface{}, fname string) {
 	fout, err := os.Create(fname)
 	defer fout.Close()
 	if err != nil {
@@ -44,12 +44,12 @@ func (memFile MemFile) saveToFile(obj interface{}, fname string) {
 	fout.Write([]byte(ret))
 }
 
-func (memFile MemFile) loadFromFile(fname string, obj interface{}) []byte {
+func loadFromFile(fname string, obj interface{}) []byte {
 	fin, err := os.Open(fname)
 	defer fin.Close()
 	if err != nil {
 		fmt.Println(fname, err)
-		return
+		return nil
 	}
 	var result, temp []byte
 	var beginPos int
@@ -73,11 +73,11 @@ func (memFile MemFile) loadFromFile(fname string, obj interface{}) []byte {
 }
 
 //TODO:field.set改为调用struct的set方法
-func (memFile MemFile) loadToMem(result []byte, obj interface{}) {
+func loadToMem(result []byte, obj interface{}) {
 	data := make(map[string]interface{})
 	json.Unmarshal(result, data)
-	t = reflect.TypeOf(test)
-	v = reflect.ValueOf(&test).Elem()
+	t := reflect.TypeOf(obj)
+	v := reflect.ValueOf(&obj).Elem()
 	for key, val := range data {
 		for i := 0; i < t.NumField(); i++ {
 			f := t.Field(i)
@@ -98,19 +98,19 @@ func (memFile MemFile) loadToMem(result []byte, obj interface{}) {
 	}
 }
 
-func (memFile MemFile) bayesLoadToMem(result []byte, obj interface{}) {
+func bayesLoadToMem(result []byte, obj interface{}) {
 
 }
 
-func (memFile *MemFile) getReader(fileName string) (*os.File, *bufio.Reader) {
+func getReader(fileName string) (*os.File, *bufio.Reader) {
 	file, err := os.Open(fileName)
 	if err != nil {
-		return nil
+		return nil, nil
 	}
 	return file, bufio.NewReader(file)
 }
 
-func (memFile *MemFile) readFile(reader *bufio.Reader, handle func(string)) error {
+func readFile(reader *bufio.Reader, handle func(string)) error {
 	if reader != nil {
 		for {
 			line, isPrefix, err := reader.ReadLine()

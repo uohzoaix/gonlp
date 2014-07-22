@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"gonlp/util"
 	"io"
 	"os"
 	"reflect"
@@ -114,6 +115,9 @@ func main() {
 	}
 	fmt.Println(test.Teles)
 
+	addOne := util.InitAddOne()
+	fmt.Println(addOne.None)
+	fmt.Println(addOne.Exist("fdf"))
 }
 
 func testfunc(bytes []byte, obj Test) (err error) {

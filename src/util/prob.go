@@ -1,10 +1,5 @@
 package util
 
-import (
-	"../util"
-	"fmt"
-)
-
 type common interface {
 	add(key string, value int)
 	getData()
@@ -15,30 +10,27 @@ type Base struct {
 	Total, None float64
 }
 
-func (base Base) Init() Base {
-	base.Data = make(map[string]float64)
-	base.Total = 0.0
-	base.None = 0
-	return base
+func InitBase() *Base {
+	return &Base{make(map[string]float64), 0.0, 0}
 }
 
-func (base Base) exist(key string) bool {
+func (base *Base) Exist(key string) bool {
 	_, ok := base.Data[key]
 	return ok
 }
-func (base Base) getSum() float64 {
+func (base *Base) GetSum() float64 {
 	return base.Total
 }
-func (base Base) get(key string) float64 {
-	if base.exist(key) {
+func (base *Base) Get(key string) float64 {
+	if base.Exist(key) {
 		return base.Data[key]
 	}
 	return base.None
 }
-func (base Base) frequency(key string) float64 {
-	return base.get(key) / base.Total
+func (base *Base) Frequency(key string) float64 {
+	return base.Get(key) / base.Total
 }
-func (base Base) samples() []float64 {
+func (base *Base) Samples() []float64 {
 	v := make([]float64, 0, len(base.Data))
 	for _, value := range base.Data {
 		v = append(v, value)
@@ -50,22 +42,20 @@ type AddOne struct {
 	Base
 }
 
-func (addOne AddOne) Init() AddOne {
-	addOne.Init()
-	addOne.None = 1
-	return addOne
+func InitAddOne() *AddOne {
+	return &AddOne{Base{make(map[string]float64), 0.0, 1}}
 }
 
-func (addOne AddOne) add(key string, value int) {
+func (addOne *AddOne) Add(key string, value int) {
 	addOne.Total += float64(value)
-	if !addOne.exist(key) {
+	if !addOne.Exist(key) {
 		addOne.Data[key] = 1
 		addOne.Total += float64(1)
 	}
 	addOne.Data[key] = addOne.Data[key] + float64(value)
 }
 
-func (addOne AddOne) getData() map[string]float64 {
+func (addOne *AddOne) GetData() map[string]float64 {
 	return addOne.Data
 }
 
@@ -74,24 +64,22 @@ type GoodTuring struct {
 	handled bool
 }
 
-func (goodTuring GoodTuring) Init() GoodTuring {
-	goodTuring.Init()
-	goodTuring.handled = false
-	return goodTuring
+func InitGoodTuring() *GoodTuring {
+	return &GoodTuring{Base{make(map[string]float64), 0.0, 0}, false}
 }
 
-func (goodTuring GoodTuring) add(key string, value int) {
-	if !goodTuring.exist(key) {
+func (goodTuring *GoodTuring) Add(key string, value int) {
+	if !goodTuring.Exist(key) {
 		goodTuring.Data[key] = float64(0)
 	}
 	goodTuring.Data[key] = goodTuring.Data[key] + float64(value)
 }
 
-func (goodTuring GoodTuring) getData() map[string]float64 {
+func (goodTuring *GoodTuring) GetData() map[string]float64 {
 	return goodTuring.Data
 }
 
-func (goodTuring GoodTuring) get(key string) float64 {
+func (goodTuring *GoodTuring) Get(key string) float64 {
 	if !goodTuring.handled {
 		goodTuring.handled = true
 		result := Calc(goodTuring.Data)
@@ -106,7 +94,7 @@ func (goodTuring GoodTuring) get(key string) float64 {
 			goodTuring.Total += value
 		}
 	}
-	if !goodTuring.exist(key) {
+	if !goodTuring.Exist(key) {
 		return goodTuring.None
 	}
 	return goodTuring.Data[key]
@@ -116,14 +104,18 @@ type Normal struct {
 	Base
 }
 
-func (normal Normal) add(key string, value int) {
-	if !normal.exist(key) {
+func InitNormal() *Normal {
+	return &Normal{Base{make(map[string]float64), 0.0, 0}}
+}
+
+func (normal *Normal) Add(key string, value int) {
+	if !normal.Exist(key) {
 		normal.Data[key] = float64(0)
 	}
 	normal.Data[key] = normal.Data[key] + float64(value)
 	normal.Total += float64(value)
 }
 
-func (normal Normal) getData() map[string]float64 {
+func (normal *Normal) GetData() map[string]float64 {
 	return normal.Data
 }

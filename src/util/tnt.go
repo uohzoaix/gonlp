@@ -17,12 +17,12 @@ type TnT struct {
 	status        []string
 	wd, eos, eosd *AddOne
 	uni, bi, tri  *Normal
-	word          map[string]*list.List
+	word          map[string]([]string)
 	trans         map[interface{}]float64
 }
 
 func NewTnT(num int) *TnT {
-	return &TnT{num, 0.0, 0.0, 0.0, []string{}, InitAddOne(), InitAddOne(), InitAddOne(), InitNormal(), InitNormal(), InitNormal(), make(map[string]*list.List), make(map[interface{}]float64)}
+	return &TnT{num, 0.0, 0.0, 0.0, []string{}, InitAddOne(), InitAddOne(), InitAddOne(), InitNormal(), InitNormal(), InitNormal(), make(map[string]([]string)), make(map[interface{}]float64)}
 }
 
 func (tnt TnT) getNum() int {
@@ -75,10 +75,10 @@ func (tnt *TnT) train(data *list.List) {
 			tnt.bi.Add(tupleStr, 1)
 			tnt.tri.Add(strings.Join(now, "-"), 1)
 			if _, ok := tnt.word[wordTag.GetWord()]; !ok {
-				tnt.word[wordTag.GetWord()] = list.New()
+				tnt.word[wordTag.GetWord()] = []string{}
 			}
 			if !Contains(tnt.word[wordTag.GetWord()], wordTag.GetTag()) {
-				tnt.word[wordTag.GetWord()].PushBack(wordTag.GetTag)
+				tnt.word[wordTag.GetWord()] = append(tnt.word[wordTag.GetWord()], wordTag.GetTag())
 			}
 			now = now[1:]
 		}
@@ -123,9 +123,37 @@ func (tnt *TnT) train(data *list.List) {
 	}
 }
 
-func Contains(list *list.List, elem interface{}) bool {
-	for t := list.Front(); t != nil; t = t.Next() {
-		if t.Value == elem {
+func (tnt *TnT) tag(data []string) []*pojo.Result {
+	tags := make([]*pojo.Tag, tnt.getNum())
+	tags = append(tags, pojo.InitTag(pojo.InitPre("BOS", "BOS"), 0.0, ""))
+	stage := make(map[*pojo.Pre]*pojo.StageValue)
+
+	for _, ch := range data {
+		samples := tnt.status
+		if val, ok := tnt.word[ch]; ok {
+			samples = val
+		}
+		for _, s := range samples {
+			wd := math.Log(tnt.wd.Get(s+"-"+ch)) - math.Log(tnt.uni.Get(s))
+			for _, tag := range tags {
+				p := tag.GetScore() + wd + tnt.trans[tag.GetPre().ToString()+"-"+s]
+				pre := &pojo.Pre{tag.GetPre().GetTwo(), s}
+				if sv, ok := stage[pre]; !ok || p > sv.GetScore() {
+					if tag.GetSuffix() == "" {
+						stage[pre] = &pojo.StageValue{p, s}
+					} else {
+						stage[pre] = &pojo.StageValue{p, tag.GetSuffix() + "-" + s}
+					}
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func Contains(arr []string, elem interface{}) bool {
+	for _, val := range arr {
+		if val == elem.(string) {
 			return true
 		}
 	}

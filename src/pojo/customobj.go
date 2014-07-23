@@ -13,16 +13,20 @@ func (classifyResult ClassifyResult) GetProb() float64 {
 }
 
 type Pre struct {
-	one string
-	two string
+	One string
+	Two string
 }
 
-func (pre Pre) GetOne() string {
-	return pre.one
+func InitPre(one string, two string) Pre {
+	return Pre{one, two}
 }
 
-func (pre Pre) GetTwo() string {
-	return pre.two
+func (pre *Pre) GetOne() string {
+	return pre.One
+}
+
+func (pre *Pre) GetTwo() string {
+	return pre.Two
 }
 
 func (pre Pre) ToString() string {
@@ -32,6 +36,10 @@ func (pre Pre) ToString() string {
 type Result struct {
 	word string
 	ch   string
+}
+
+func InitResult(word string, ch string) *Result {
+	return &Result{word, ch}
 }
 
 func (result Result) GetWord() string {
@@ -46,20 +54,24 @@ func (result Result) ToString() string {
 }
 
 type Tag struct {
-	prefix Pre
-	score  float64
-	suffix string
+	Prefix *Pre
+	Score  float64
+	Suffix string
 }
 
-func (tag Tag) GetPre() Pre {
-	return tag.prefix
+func InitTag(prefix Pre, score float64, suffix string) *Tag {
+	return &Tag{&prefix, score, suffix}
+}
+
+func (tag Tag) GetPre() *Pre {
+	return tag.Prefix
 }
 
 func (tag Tag) GetScore() float64 {
-	return tag.score
+	return tag.Score
 }
-func (tag Tag) Suffix() string {
-	return tag.suffix
+func (tag Tag) GetSuffix() string {
+	return tag.Suffix
 }
 
 type WordTag struct {
@@ -80,4 +92,20 @@ func (wordTag WordTag) GetTag() string {
 
 func (wordTag WordTag) ToString() string {
 	return wordTag.GetTag() + "-" + wordTag.GetWord()
+}
+
+type StageValue struct {
+	Score float64
+	Value string
+}
+
+func InitSV(score float64, value string) *StageValue {
+	return &StageValue{score, value}
+}
+
+func (sv *StageValue) GetScore() float64 {
+	return sv.Score
+}
+func (sv *StageValue) GetValue() string {
+	return sv.Value
 }

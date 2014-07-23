@@ -30,10 +30,10 @@ func (base *Base) Get(key string) float64 {
 func (base *Base) Frequency(key string) float64 {
 	return base.Get(key) / base.Total
 }
-func (base *Base) Samples() []float64 {
-	v := make([]float64, 0, len(base.Data))
-	for _, value := range base.Data {
-		v = append(v, value)
+func (base *Base) Samples() []string {
+	v := []string{}
+	for key, _ := range base.Data {
+		v = append(v, key)
 	}
 	return v
 }

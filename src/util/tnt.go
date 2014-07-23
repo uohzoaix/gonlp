@@ -3,6 +3,7 @@ package util
 import (
 	"container/list"
 	"encoding/json"
+	"fmt"
 	"gonlp/pojo"
 	"math"
 	"strings"
@@ -21,7 +22,7 @@ type TnT struct {
 }
 
 func NewTnT(num int) *TnT {
-	return &TnT{num, 0.0, 0.0, 0.0, make([]string, 0), InitAddOne(), InitAddOne(), InitAddOne(), InitNormal(), InitNormal(), InitNormal(), make(map[string]*list.List), make(map[interface{}]float64)}
+	return &TnT{num, 0.0, 0.0, 0.0, []string{}, InitAddOne(), InitAddOne(), InitAddOne(), InitNormal(), InitNormal(), InitNormal(), make(map[string]*list.List), make(map[interface{}]float64)}
 }
 
 func (tnt TnT) getNum() int {
@@ -81,6 +82,44 @@ func (tnt *TnT) train(data *list.List) {
 			}
 			now = now[1:]
 		}
+		tnt.eos.Add(now[len(now)-1]+"-EOS", 1)
+	}
+	var tl1, tl2, tl3 float64
+	for _, val := range tnt.tri.Samples() {
+		now = FromString(val)
+		c3 := tnt.tntDiv(tnt.tri.Get(val)-1, tnt.bi.Get(ToString(now[0:2]))-1)
+		c2 := tnt.tntDiv(tnt.bi.Get(ToString(now[1:]))-1, tnt.uni.Get(now[1])-1)
+		c1 := tnt.tntDiv(tnt.uni.Get(now[2])-1, tnt.uni.GetSum()-1)
+		result := tnt.tri.Get(ToString(now))
+		if c3 >= c1 && c3 >= c2 {
+			tl3 += result
+		} else if c2 >= c1 && c2 >= c3 {
+			tl2 += result
+		} else if c1 >= c2 && c1 >= c3 {
+			tl1 += result
+		}
+	}
+
+	tnt.l1 = tl1 / (tl1 + tl2 + tl3)
+	tnt.l2 = tl2 / (tl1 + tl2 + tl3)
+	tnt.l3 = tl3 / (tl1 + tl2 + tl3)
+	newStatus := &StringSet{make(map[string]bool)}
+	for _, val := range tnt.status {
+		newStatus.Add(val)
+	}
+	newStatus.Add("BOS")
+	for key1, _ := range newStatus.set {
+		for key2, _ := range newStatus.set {
+			for _, val := range tnt.status {
+				if key1 == "BOS" && key2 == "BOS" && val == "s" {
+					fmt.Println("aa")
+				}
+				uni := tnt.l1 * tnt.uni.Frequency(val)
+				bi := tnt.tntDiv(tnt.l2*tnt.bi.Get(key2+"-"+val), tnt.uni.Get(key2))
+				tri := tnt.tntDiv(tnt.l3*tnt.tri.Get(key1+"-"+key2+"-"+val), tnt.bi.Get(key1+"-"+key2))
+				tnt.trans[key1+"-"+key2+"-"+val] = math.Log(uni + bi + tri)
+			}
+		}
 	}
 }
 
@@ -91,6 +130,16 @@ func Contains(list *list.List, elem interface{}) bool {
 		}
 	}
 	return false
+}
+
+type StringSet struct {
+	set map[string]bool
+}
+
+func (set *StringSet) Add(str string) bool {
+	_, found := set.set[str]
+	set.set[str] = true
+	return !found
 }
 
 //func ToString(slice []string) string {

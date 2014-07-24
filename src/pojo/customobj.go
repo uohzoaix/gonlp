@@ -21,11 +21,11 @@ func InitPre(one string, two string) Pre {
 	return Pre{one, two}
 }
 
-func (pre *Pre) GetOne() string {
+func (pre Pre) GetOne() string {
 	return pre.One
 }
 
-func (pre *Pre) GetTwo() string {
+func (pre Pre) GetTwo() string {
 	return pre.Two
 }
 
@@ -34,8 +34,8 @@ func (pre Pre) ToString() string {
 }
 
 type Result struct {
-	word string
-	ch   string
+	Word string
+	Ch   string
 }
 
 func InitResult(word string, ch string) *Result {
@@ -43,10 +43,10 @@ func InitResult(word string, ch string) *Result {
 }
 
 func (result Result) GetWord() string {
-	return result.word
+	return result.Word
 }
 func (result Result) GetCh() string {
-	return result.ch
+	return result.Ch
 }
 
 func (result Result) ToString() string {
@@ -54,16 +54,16 @@ func (result Result) ToString() string {
 }
 
 type Tag struct {
-	Prefix *Pre
+	Prefix Pre
 	Score  float64
 	Suffix string
 }
 
-func InitTag(prefix Pre, score float64, suffix string) *Tag {
-	return &Tag{&prefix, score, suffix}
+func InitTag(prefix Pre, score float64, suffix string) Tag {
+	return Tag{prefix, score, suffix}
 }
 
-func (tag Tag) GetPre() *Pre {
+func (tag Tag) GetPre() Pre {
 	return tag.Prefix
 }
 

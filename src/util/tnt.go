@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"gonlp/pojo"
 	"math"
+	"sort"
 	"strings"
 )
 
@@ -123,10 +124,10 @@ func (tnt *TnT) train(data *list.List) {
 	}
 }
 
-func (tnt *TnT) tag(data []string) []*pojo.Result {
-	tags := make([]*pojo.Tag, tnt.getNum())
+func (tnt *TnT) tag(data []string) []pojo.Result {
+	tags := make([]pojo.Tag, tnt.getNum())
 	tags = append(tags, pojo.InitTag(pojo.InitPre("BOS", "BOS"), 0.0, ""))
-	stage := make(map[*pojo.Pre]*pojo.StageValue)
+	stage := make(map[pojo.Pre]pojo.StageValue)
 
 	for _, ch := range data {
 		samples := tnt.status
@@ -137,18 +138,69 @@ func (tnt *TnT) tag(data []string) []*pojo.Result {
 			wd := math.Log(tnt.wd.Get(s+"-"+ch)) - math.Log(tnt.uni.Get(s))
 			for _, tag := range tags {
 				p := tag.GetScore() + wd + tnt.trans[tag.GetPre().ToString()+"-"+s]
-				pre := &pojo.Pre{tag.GetPre().GetTwo(), s}
+				pre := pojo.Pre{tag.GetPre().GetTwo(), s}
 				if sv, ok := stage[pre]; !ok || p > sv.GetScore() {
 					if tag.GetSuffix() == "" {
-						stage[pre] = &pojo.StageValue{p, s}
+						stage[pre] = pojo.StageValue{p, s}
 					} else {
-						stage[pre] = &pojo.StageValue{p, tag.GetSuffix() + "-" + s}
+						stage[pre] = pojo.StageValue{p, tag.GetSuffix() + "-" + s}
 					}
 				}
 			}
 		}
+		tags = []pojo.Tag{}
+		for key, val := range stage {
+			tags = append(tags, pojo.Tag{key, val.GetScore(), val.GetValue()})
+		}
+		temp := make(map[float64]pojo.Tag)
+		for _, val := range tags {
+			temp[val.GetScore()] = val
+		}
+		mk := make([]float64, len(temp))
+		i := 0
+		for k, _ := range temp {
+			mk[i] = k
+			i++
+		}
+		sort.Sort(sort.Reverse(sort.Float64Slice(mk)))
+		tags = []pojo.Tag{}
+		i = 0
+		for _, v := range mk {
+			if i < tnt.getNum() {
+				tags = append(tags, temp[v])
+			}
+			i++
+		}
 	}
-	return nil
+	tags = []pojo.Tag{}
+	for key, val := range stage {
+		score := val.GetScore() + tnt.getEos(key.GetTwo())
+		tags = append(tags, pojo.Tag{key, score, val.GetValue()})
+	}
+	temp := make(map[float64]pojo.Tag)
+	for _, val := range tags {
+		temp[val.GetScore()] = val
+	}
+	mk := make([]float64, len(temp))
+	i := 0
+	for k, _ := range temp {
+		mk[i] = k
+		i++
+	}
+	sort.Sort(sort.Reverse(sort.Float64Slice(mk)))
+	tags = []pojo.Tag{}
+	for _, v := range mk {
+		tags = append(tags, temp[v])
+	}
+	results := []pojo.Result{}
+	tagArr := strings.Split(tags[0].GetSuffix(), "-")
+	if len(tagArr) != len(data) {
+		panic("出错了！")
+	}
+	for i, val := range data {
+		results = append(results, pojo.Result{val, tagArr[i]})
+	}
+	return results
 }
 
 func Contains(arr []string, elem interface{}) bool {

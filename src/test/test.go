@@ -2,9 +2,11 @@ package main
 
 import (
 	"bufio"
+	"container/list"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"gonlp/pojo"
 	"gonlp/util"
 	"io"
 	"os"
@@ -118,6 +120,19 @@ func main() {
 	addOne := util.InitAddOne()
 	fmt.Println(addOne.None)
 	fmt.Println(addOne.Exist("fdf"))
+
+	dicts := list.New()
+	wordTags := list.New()
+	wordTags.PushBack(pojo.InitWT("fdf", "gfgg"))
+	dicts.PushBack(wordTags)
+	fmt.Println(dicts.Front().Value.(*list.List).Front().Value.(*pojo.WordTag).ToString())
+
+	testmaplist := make(map[string]*list.List)
+	testmaplist["fdf"] = list.New()
+
+	tags := make([]pojo.Tag, 1)
+	tags = append(tags, pojo.InitTag(pojo.InitPre("BOS", "BOS"), 0.0, ""))
+
 }
 
 func testfunc(bytes []byte, obj Test) (err error) {

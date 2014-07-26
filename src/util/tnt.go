@@ -23,6 +23,9 @@ type TnT struct {
 }
 
 func NewTnT(num int) *TnT {
+	if num == 0 {
+		num = 100
+	}
 	return &TnT{num, 0.0, 0.0, 0.0, []string{}, InitAddOne(), InitAddOne(), InitAddOne(), InitNormal(), InitNormal(), InitNormal(), make(map[string]([]string)), make(map[interface{}]float64)}
 }
 
@@ -30,11 +33,11 @@ func (tnt TnT) getNum() int {
 	return tnt.num
 }
 
-func (tnt *TnT) save(fname string) {
+func (tnt *TnT) Save(fname string) {
 	saveToFile(tnt, fname)
 }
 
-func (tnt *TnT) load(fname string) {
+func (tnt *TnT) Load(fname string) {
 	result := loadFromFile(fname, tnt)
 	if result != nil {
 		//MemFile.loadToMem(result, tnt)
@@ -56,7 +59,7 @@ func (tnt *TnT) getEos(tag string) float64 {
 	return math.Log(tnt.eos.Get(tag+"-EOS")) - math.Log(tnt.eosd.Get(tag))
 }
 
-func (tnt *TnT) train(data *list.List) {
+func (tnt *TnT) Train(data *list.List) {
 	now := []string{}
 	now = append(now, "BOS")
 	now = append(now, "BOS")
@@ -124,7 +127,7 @@ func (tnt *TnT) train(data *list.List) {
 	}
 }
 
-func (tnt *TnT) tag(data []string) []pojo.Result {
+func (tnt *TnT) Tag(data []string) []pojo.Result {
 	tags := make([]pojo.Tag, tnt.getNum())
 	tags = append(tags, pojo.InitTag(pojo.InitPre("BOS", "BOS"), 0.0, ""))
 	stage := make(map[pojo.Pre]pojo.StageValue)

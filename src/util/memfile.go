@@ -102,7 +102,7 @@ func bayesLoadToMem(result []byte, obj interface{}) {
 
 }
 
-func getReader(fileName string) (*os.File, *bufio.Reader) {
+func GetReader(fileName string) (*os.File, *bufio.Reader) {
 	file, err := os.Open(fileName)
 	if err != nil {
 		return nil, nil
@@ -110,7 +110,7 @@ func getReader(fileName string) (*os.File, *bufio.Reader) {
 	return file, bufio.NewReader(file)
 }
 
-func readFile(reader *bufio.Reader, handle func(string)) error {
+func ReadFile(reader *bufio.Reader, handle func(string)) error {
 	if reader != nil {
 		for {
 			line, isPrefix, err := reader.ReadLine()

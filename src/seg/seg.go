@@ -15,6 +15,7 @@ type Seg struct {
 
 func (seg *Seg) InitSeg() {
 	seg.segger = util.NewTnT(0)
+	seg.segger.Load("seg.marshal")
 }
 
 func (seg *Seg) Save(fname string) {
@@ -31,8 +32,7 @@ func (seg *Seg) Train(fileName string) {
 	defer file.Close()
 	if reader != nil {
 		err := util.ReadFile(reader, func(line string) {
-			words := strings.Fields(line)
-			line = strings.Join(words, "")
+			line = strings.Trim(line, " ")
 			wts := list.New()
 			wordTags.PushBack(wts)
 			for _, str := range regexp.MustCompile("[^\\s]+").FindAllString(line, -1) {
@@ -48,7 +48,7 @@ func (seg *Seg) Train(fileName string) {
 	}
 }
 
-func (seg *Seg) Seg(sentence string) []string {
+func (seg *Seg) SegOne(sentence string) []string {
 	ret := []string{}
 	data := []string{}
 	for _, ch := range sentence {
@@ -68,4 +68,26 @@ func (seg *Seg) Seg(sentence string) []string {
 		}
 	}
 	return ret
+}
+
+func (seg *Seg) Seg(sent string) []string {
+	words := []string{}
+	for _, str := range regexp.MustCompile("([\u4E00-\u9FA5]+)").FindAllString(sent, -1) {
+		str = strings.Trim(str, " ")
+		if str == "" {
+			continue
+		}
+		hzRegexp := regexp.MustCompile("[\u4e00-\u9fa5]")
+		if ok := hzRegexp.MatchString(str); ok {
+			words = append(words, seg.SegOne(str)...)
+		} else {
+			for _, word := range regexp.MustCompile("[^\\s]+").FindAllString(str, -1) {
+				word = strings.Trim(word, " ")
+				if word != "" {
+					words = append(words, word)
+				}
+			}
+		}
+	}
+	return words
 }

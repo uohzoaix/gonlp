@@ -11,6 +11,8 @@ import (
 	"io"
 	"os"
 	"reflect"
+	"regexp"
+	"strings"
 	"unsafe"
 )
 
@@ -132,6 +134,23 @@ func main() {
 
 	tags := make([]pojo.Tag, 1)
 	tags = append(tags, pojo.InitTag(pojo.InitPre("BOS", "BOS"), 0.0, ""))
+
+	teststring := "你好啊,abcd"
+	for _, val := range teststring {
+		fmt.Println(string(val))
+	}
+
+	teststring = "  fdf fd gfhgh "
+	fmt.Println(strings.Fields(teststring))
+	fmt.Println(regexp.MustCompile("[^\\s]+").FindAllString(teststring, -1))
+
+	fmt.Println(regexp.MustCompile("([\u4E00-\u9FA5]+)").FindAllString("你好 fdf 费大幅度发", -1))
+	fmt.Println(strings.Trim("    fdf     ", " "))
+
+	testsliceappend := []string{"dff", "dgf"}
+	testappended := []string{"fdg", "ghhh"}
+	testsliceappend = append(testsliceappend, testappended...)
+	fmt.Println(testsliceappend)
 
 }
 

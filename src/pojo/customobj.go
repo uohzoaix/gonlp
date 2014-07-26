@@ -75,8 +75,8 @@ func (tag Tag) GetSuffix() string {
 }
 
 type WordTag struct {
-	word string
-	tag  string
+	Word string
+	Tag  string
 }
 
 func InitWT(word string, tag string) *WordTag {
@@ -84,10 +84,10 @@ func InitWT(word string, tag string) *WordTag {
 }
 
 func (wordTag WordTag) GetWord() string {
-	return wordTag.word
+	return wordTag.Word
 }
 func (wordTag WordTag) GetTag() string {
-	return wordTag.tag
+	return wordTag.Tag
 }
 
 func (wordTag WordTag) ToString() string {

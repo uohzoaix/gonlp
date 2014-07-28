@@ -18,7 +18,7 @@ func (base *Base) Exist(key string) bool {
 	_, ok := base.Data[key]
 	return ok
 }
-func (base *Base) GetSum() float64 {
+func (base Base) GetSum() float64 {
 	return base.Total
 }
 func (base *Base) Get(key string) float64 {
@@ -27,7 +27,7 @@ func (base *Base) Get(key string) float64 {
 	}
 	return base.None
 }
-func (base *Base) Frequency(key string) float64 {
+func (base Base) Frequency(key string) float64 {
 	return base.Get(key) / base.Total
 }
 func (base *Base) Samples() []string {
@@ -46,7 +46,7 @@ func InitAddOne() *AddOne {
 	return &AddOne{Base{make(map[string]float64), 0.0, 1}}
 }
 
-func (addOne *AddOne) Add(key string, value int) {
+func (addOne AddOne) Add(key string, value int) {
 	addOne.Total += float64(value)
 	if !addOne.Exist(key) {
 		addOne.Data[key] = 1

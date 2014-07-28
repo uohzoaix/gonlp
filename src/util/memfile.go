@@ -30,10 +30,10 @@ func loadFromMem(fname string, tnt *TnT) {
 	//		data[f.Name] = val
 	//	}
 	//}
-	saveToFile(&tnt, fname)
+	SaveToFile(&tnt, fname)
 }
 
-func saveToFile(obj interface{}, fname string) {
+func SaveToFile(obj interface{}, fname string) {
 	fout, err := os.Create(fname)
 	defer fout.Close()
 	if err != nil {
@@ -44,7 +44,7 @@ func saveToFile(obj interface{}, fname string) {
 	fout.Write([]byte(ret))
 }
 
-func loadFromFile(fname string, obj interface{}) []byte {
+func LoadFromFile(fname string) []byte {
 	fin, err := os.Open(fname)
 	defer fin.Close()
 	if err != nil {

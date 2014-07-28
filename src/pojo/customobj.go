@@ -1,15 +1,15 @@
 package pojo
 
 type ClassifyResult struct {
-	ret  string
-	prob float64
+	Ret  string
+	Prob float64
 }
 
 func (classifyResult ClassifyResult) GetRet() string {
-	return classifyResult.ret
+	return classifyResult.Ret
 }
 func (classifyResult ClassifyResult) GetProb() float64 {
-	return classifyResult.prob
+	return classifyResult.Prob
 }
 
 type Pre struct {

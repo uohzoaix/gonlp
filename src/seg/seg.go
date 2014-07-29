@@ -13,9 +13,10 @@ type Seg struct {
 	segger *util.TnT
 }
 
-func (seg *Seg) InitSeg() {
-	seg.segger = util.NewTnT(0)
-	seg.segger.Load("seg.marshal")
+func InitSeg() Seg {
+	segger := util.NewTnT(0)
+	segger.Load("seg.marshal")
+	return Seg{segger}
 }
 
 func (seg *Seg) Save(fname string) {

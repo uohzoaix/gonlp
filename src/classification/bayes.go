@@ -13,9 +13,8 @@ type Bayes struct {
 	Total float64
 }
 
-func (bayes *Bayes) InitBayes() {
-	bayes.D = make(map[string]util.AddOne)
-	bayes.Total = 0.0
+func InitBayes() Bayes {
+	return Bayes{make(map[string]util.AddOne), 0.0}
 }
 
 func (bayes *Bayes) Save(fname string) {

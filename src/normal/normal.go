@@ -12,39 +12,40 @@ type Normal struct {
 	Pinyin map[string]string
 }
 
-func (normal *Normal) InitNormal() {
-	normal.Stop = []string{}
-	normal.Pinyin = make(map[string]string)
-	normal.initStop("stopwords.txt")
-	normal.initPinyin("pinyin.txt")
+func InitNormal() Normal {
+	return Normal{initStop("stopwords.txt"), initPinyin("pinyin.txt")}
 }
 
-func (normal *Normal) initStop(stopFile string) {
+func initStop(stopFile string) []string {
+	result := []string{}
 	file, reader := util.GetReader(stopFile)
 	defer file.Close()
 	if reader != nil {
 		err := util.ReadFile(reader, func(line string) {
 			line = strings.Trim(line, " ")
-			normal.Stop = append(normal.Stop, line)
+			result = append(result, line)
 		})
 		if err != nil {
 			log.Println("normal load stopFile err", err)
 		}
 	}
+	return result
 }
 
-func (normal *Normal) initPinyin(pyFile string) {
+func initPinyin(pyFile string) map[string]string {
+	result := make(map[string]string)
 	file, reader := util.GetReader(pyFile)
 	defer file.Close()
 	if reader != nil {
 		err := util.ReadFile(reader, func(line string) {
 			words := strings.SplitN(strings.Trim(line, " "), " ", 2)
-			normal.Pinyin[words[0]] = words[1]
+			result[words[0]] = words[1]
 		})
 		if err != nil {
 			log.Println("normal load pinyinFile err", err)
 		}
 	}
+	return result
 }
 
 func (normal *Normal) FilterStop(words []string) []string {

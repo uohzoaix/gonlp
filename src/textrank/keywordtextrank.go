@@ -1,8 +1,8 @@
 package textrank
 
 import (
+	"gonlp/util"
 	"math"
-	"sort"
 )
 
 type KeyWordTextRank struct {
@@ -12,22 +12,11 @@ type KeyWordTextRank struct {
 	D       float64
 	MaxIter int
 	Mindiff float64
-	Top     PairList
+	Top     util.PairList
 }
-
-type Pair struct {
-	Key   string
-	Value float64
-}
-
-type PairList []Pair
-
-func (p PairList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
-func (p PairList) Len() int           { return len(p) }
-func (p PairList) Less(i, j int) bool { return p[i].Value > p[j].Value }
 
 func InitKWRank(docs [][]string) *KeyWordTextRank {
-	return &KeyWordTextRank{docs, make(map[string][]string), make(map[string]float64), 0.85, 200, 0.001, []Pair{}}
+	return &KeyWordTextRank{docs, make(map[string][]string), make(map[string]float64), 0.85, 200, 0.001, []util.Pair{}}
 }
 
 func (kwRank *KeyWordTextRank) Solve() {
@@ -78,7 +67,7 @@ func (kwRank *KeyWordTextRank) Solve() {
 			}
 		}
 	}
-	kwRank.Top = sortMapByValue(kwRank.Vertex)
+	kwRank.Top = util.SortMapByValue(kwRank.Vertex)
 }
 
 func (kwRank *KeyWordTextRank) TopIndex(limit int) []string {
@@ -92,14 +81,4 @@ func (kwRank *KeyWordTextRank) TopIndex(limit int) []string {
 		num++
 	}
 	return indexes
-}
-
-func sortMapByValue(m map[string]float64) PairList {
-	p := make(PairList, len(m))
-	i := 0
-	for k, v := range m {
-		p[i] = Pair{k, v}
-	}
-	sort.Sort(p)
-	return p
 }

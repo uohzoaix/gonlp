@@ -38,8 +38,8 @@ type Result struct {
 	Ch   string
 }
 
-func InitResult(word string, ch string) *Result {
-	return &Result{word, ch}
+func InitResult(word string, ch string) Result {
+	return Result{word, ch}
 }
 
 func (result Result) GetWord() string {

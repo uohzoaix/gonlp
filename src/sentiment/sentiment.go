@@ -11,8 +11,8 @@ import (
 
 type Sentiment struct {
 	Bayes  classification.Bayes
-	Normal normal.Normal
-	Seg    seg.Seg
+	Normal *normal.Normal
+	Seg    *seg.Seg
 }
 
 func InitSentiment() *Sentiment {
@@ -70,4 +70,12 @@ func (sentiment *Sentiment) Train(negFile string, posFile string) {
 		data = append(data, arr)
 	}
 	sentiment.Bayes.Train(data)
+}
+
+func (sentiment *Sentiment) Classify(sent string) float64 {
+	result := sentiment.Bayes.Classify(sentiment.Handle(sent))
+	if result.GetRet() == "pos" {
+		return result.GetProb()
+	}
+	return 1 - result.GetProb()
 }

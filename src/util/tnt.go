@@ -3,8 +3,9 @@ package util
 import (
 	"container/list"
 	"encoding/json"
-	"fmt"
+	//"fmt"
 	"gonlp/pojo"
+	"log"
 	"math"
 	"sort"
 	"strings"
@@ -34,14 +35,16 @@ func (tnt TnT) getNum() int {
 }
 
 func (tnt *TnT) Save(fname string) {
-	saveToFile(tnt, fname)
+	SaveToFile(tnt, fname)
 }
 
 func (tnt *TnT) Load(fname string) {
-	result := loadFromFile(fname, tnt)
+	result := LoadFromFile(fname)
+	log.Println(result)
 	if result != nil {
 		//MemFile.loadToMem(result, tnt)
 		json.Unmarshal(result, &tnt)
+		log.Println(tnt)
 	}
 }
 
@@ -68,7 +71,7 @@ func (tnt *TnT) Train(data *list.List) {
 		tnt.uni.Add("BOS", 2)
 		newList := wtList.Value.(*list.List)
 		for wt := newList.Front(); wt != nil; wt = wt.Next() {
-			wordTag := wt.Value.(*pojo.WordTag)
+			wordTag := wt.Value.(pojo.WordTag)
 			now = append(now, wordTag.GetTag())
 			tupleStr := strings.Join(now[1:], "-")
 			tnt.status = append(tnt.status, wordTag.GetTag())
@@ -112,15 +115,18 @@ func (tnt *TnT) Train(data *list.List) {
 		newStatus.Add(val)
 	}
 	newStatus.Add("BOS")
+	var uni float64
+	var bi float64
+	var tri float64
 	for key1, _ := range newStatus.set {
 		for key2, _ := range newStatus.set {
 			for _, val := range tnt.status {
 				if key1 == "BOS" && key2 == "BOS" && val == "s" {
-					fmt.Println("aa")
+					//fmt.Println("aa")
 				}
-				uni := tnt.l1 * tnt.uni.Frequency(val)
-				bi := tnt.tntDiv(tnt.l2*tnt.bi.Get(key2+"-"+val), tnt.uni.Get(key2))
-				tri := tnt.tntDiv(tnt.l3*tnt.tri.Get(key1+"-"+key2+"-"+val), tnt.bi.Get(key1+"-"+key2))
+				uni = tnt.l1 * tnt.uni.Frequency(val)
+				bi = tnt.tntDiv(tnt.l2*tnt.bi.Get(key2+"-"+val), tnt.uni.Get(key2))
+				tri = tnt.tntDiv(tnt.l3*tnt.tri.Get(key1+"-"+key2+"-"+val), tnt.bi.Get(key1+"-"+key2))
 				tnt.trans[key1+"-"+key2+"-"+val] = math.Log(uni + bi + tri)
 			}
 		}
@@ -128,11 +134,13 @@ func (tnt *TnT) Train(data *list.List) {
 }
 
 func (tnt *TnT) Tag(data []string) []pojo.Result {
-	tags := make([]pojo.Tag, tnt.getNum())
+	//log.Println("tnt", tnt)
+	tags := []pojo.Tag{}
 	tags = append(tags, pojo.InitTag(pojo.InitPre("BOS", "BOS"), 0.0, ""))
-	stage := make(map[pojo.Pre]pojo.StageValue)
+	stage := make(map[string]pojo.StageValue)
 
 	for _, ch := range data {
+		stage = make(map[string]pojo.StageValue)
 		samples := tnt.status
 		if val, ok := tnt.word[ch]; ok {
 			samples = val
@@ -141,7 +149,7 @@ func (tnt *TnT) Tag(data []string) []pojo.Result {
 			wd := math.Log(tnt.wd.Get(s+"-"+ch)) - math.Log(tnt.uni.Get(s))
 			for _, tag := range tags {
 				p := tag.GetScore() + wd + tnt.trans[tag.GetPre().ToString()+"-"+s]
-				pre := pojo.Pre{tag.GetPre().GetTwo(), s}
+				pre := pojo.Pre{tag.GetPre().GetTwo(), s}.ToString()
 				if sv, ok := stage[pre]; !ok || p > sv.GetScore() {
 					if tag.GetSuffix() == "" {
 						stage[pre] = pojo.StageValue{p, s}
@@ -153,16 +161,16 @@ func (tnt *TnT) Tag(data []string) []pojo.Result {
 		}
 		tags = []pojo.Tag{}
 		for key, val := range stage {
-			tags = append(tags, pojo.Tag{key, val.GetScore(), val.GetValue()})
+			tags = append(tags, pojo.Tag{pojo.InitPre(strings.Split(key, "-")[0], strings.Split(key, "-")[1]), val.GetScore(), val.GetValue()})
 		}
 		temp := make(map[float64]pojo.Tag)
 		for _, val := range tags {
 			temp[val.GetScore()] = val
 		}
-		mk := make([]float64, len(temp))
+		mk := []float64{}
 		i := 0
 		for k, _ := range temp {
-			mk[i] = k
+			mk = append(mk, k)
 			i++
 		}
 		sort.Sort(sort.Reverse(sort.Float64Slice(mk)))
@@ -177,18 +185,16 @@ func (tnt *TnT) Tag(data []string) []pojo.Result {
 	}
 	tags = []pojo.Tag{}
 	for key, val := range stage {
-		score := val.GetScore() + tnt.getEos(key.GetTwo())
-		tags = append(tags, pojo.Tag{key, score, val.GetValue()})
+		score := val.GetScore() + tnt.getEos(strings.Split(key, "-")[1])
+		tags = append(tags, pojo.Tag{pojo.InitPre(strings.Split(key, "-")[0], strings.Split(key, "-")[1]), score, val.GetValue()})
 	}
 	temp := make(map[float64]pojo.Tag)
 	for _, val := range tags {
 		temp[val.GetScore()] = val
 	}
-	mk := make([]float64, len(temp))
-	i := 0
+	mk := []float64{}
 	for k, _ := range temp {
-		mk[i] = k
-		i++
+		mk = append(mk, k)
 	}
 	sort.Sort(sort.Reverse(sort.Float64Slice(mk)))
 	tags = []pojo.Tag{}
@@ -197,6 +203,8 @@ func (tnt *TnT) Tag(data []string) []pojo.Result {
 	}
 	results := []pojo.Result{}
 	tagArr := strings.Split(tags[0].GetSuffix(), "-")
+	log.Println("tagArr:", tagArr)
+	log.Println("data:", data)
 	if len(tagArr) != len(data) {
 		panic("出错了！")
 	}

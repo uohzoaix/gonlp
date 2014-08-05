@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"reflect"
 )
@@ -30,17 +31,18 @@ func loadFromMem(fname string, tnt *TnT) {
 	//		data[f.Name] = val
 	//	}
 	//}
-	SaveToFile(&tnt, fname)
+	SaveToFile(tnt, fname)
 }
 
-func SaveToFile(obj interface{}, fname string) {
+func SaveToFile(tnt *TnT, fname string) {
 	fout, err := os.Create(fname)
 	defer fout.Close()
 	if err != nil {
 		fmt.Println(fname, err)
 		return
 	}
-	ret, _ := json.Marshal(obj)
+	ret, _ := json.Marshal(tnt)
+	log.Println(ret)
 	fout.Write([]byte(ret))
 }
 

@@ -10,9 +10,11 @@ func ToString(tuple []string) string {
 
 func FromString(str string) []string {
 	strArr := strings.Split(str, "-")
-	result := make([]string, len(strArr))
+	result := []string{}
 	for _, val := range strArr {
-		result = append(result, val)
+		if val != "" {
+			result = append(result, strings.Trim(val, " "))
+		}
 	}
 	return result
 }

@@ -34,16 +34,18 @@ func loadFromMem(fname string, tnt *TnT) {
 	SaveToFile(tnt, fname)
 }
 
-func SaveToFile(tnt *TnT, fname string) {
+func SaveToFile(obj interface{}, fname string) {
+	log.Println("SaveToFile() ", fname)
 	fout, err := os.Create(fname)
 	defer fout.Close()
 	if err != nil {
 		fmt.Println(fname, err)
 		return
 	}
-	ret, _ := json.Marshal(tnt)
-	log.Println(ret)
-	fout.Write([]byte(ret))
+	encoder := json.NewEncoder(fout)
+	encoder.Encode(obj)
+	//ret, _ := json.Marshal(obj)
+	//fout.Write([]byte(ret))
 }
 
 func LoadFromFile(fname string) []byte {

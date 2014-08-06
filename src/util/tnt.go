@@ -12,26 +12,26 @@ import (
 )
 
 type TnT struct {
-	num           int
-	l1            float64
-	l2            float64
-	l3            float64
-	status        []string
-	wd, eos, eosd *AddOne
-	uni, bi, tri  *Normal
-	word          map[string]([]string)
-	trans         map[interface{}]float64
+	Num           int
+	L1            float64
+	L2            float64
+	L3            float64
+	Status        []string
+	Wd, Eos, Eosd *AddOne
+	Uni, Bi, Tri  *Normal
+	Word          map[string]([]string)
+	Trans         map[string]float64
 }
 
 func NewTnT(num int) *TnT {
 	if num == 0 {
 		num = 100
 	}
-	return &TnT{num, 0.0, 0.0, 0.0, []string{}, InitAddOne(), InitAddOne(), InitAddOne(), InitNormal(), InitNormal(), InitNormal(), make(map[string]([]string)), make(map[interface{}]float64)}
+	return &TnT{num, 0.0, 0.0, 0.0, []string{}, InitAddOne(), InitAddOne(), InitAddOne(), InitNormal(), InitNormal(), InitNormal(), make(map[string]([]string)), make(map[string]float64)}
 }
 
 func (tnt TnT) getNum() int {
-	return tnt.num
+	return tnt.Num
 }
 
 func (tnt *TnT) Save(fname string) {
@@ -40,11 +40,9 @@ func (tnt *TnT) Save(fname string) {
 
 func (tnt *TnT) Load(fname string) {
 	result := LoadFromFile(fname)
-	log.Println(result)
 	if result != nil {
 		//MemFile.loadToMem(result, tnt)
 		json.Unmarshal(result, &tnt)
-		log.Println(tnt)
 	}
 }
 
@@ -56,10 +54,10 @@ func (tnt *TnT) tntDiv(v1 float64, v2 float64) float64 {
 }
 
 func (tnt *TnT) getEos(tag string) float64 {
-	if tnt.eosd.Exist(tag) {
-		return math.Log((float64)(1.0 / len(tnt.status)))
+	if !tnt.Eosd.Exist(tag) {
+		return math.Log((float64)(1.0 / len(tnt.Status)))
 	}
-	return math.Log(tnt.eos.Get(tag+"-EOS")) - math.Log(tnt.eosd.Get(tag))
+	return math.Log(tnt.Eos.Get(tag+"-EOS")) - math.Log(tnt.Eosd.Get(tag))
 }
 
 func (tnt *TnT) Train(data *list.List) {
@@ -67,37 +65,37 @@ func (tnt *TnT) Train(data *list.List) {
 	now = append(now, "BOS")
 	now = append(now, "BOS")
 	for wtList := data.Front(); wtList != nil; wtList = wtList.Next() {
-		tnt.bi.Add("BOS-BOS", 1)
-		tnt.uni.Add("BOS", 2)
+		tnt.Bi.Add("BOS-BOS", 1)
+		tnt.Uni.Add("BOS", 2)
 		newList := wtList.Value.(*list.List)
 		for wt := newList.Front(); wt != nil; wt = wt.Next() {
 			wordTag := wt.Value.(pojo.WordTag)
 			now = append(now, wordTag.GetTag())
 			tupleStr := strings.Join(now[1:], "-")
-			tnt.status = append(tnt.status, wordTag.GetTag())
-			tnt.wd.Add(wordTag.ToString(), 1)
-			tnt.eos.Add(tupleStr, 1)
-			tnt.eosd.Add(wordTag.GetTag(), 1)
-			tnt.uni.Add(wordTag.GetTag(), 1)
-			tnt.bi.Add(tupleStr, 1)
-			tnt.tri.Add(strings.Join(now, "-"), 1)
-			if _, ok := tnt.word[wordTag.GetWord()]; !ok {
-				tnt.word[wordTag.GetWord()] = []string{}
+			tnt.Status = append(tnt.Status, wordTag.GetTag())
+			tnt.Wd.Add(wordTag.ToString(), 1)
+			tnt.Eos.Add(tupleStr, 1)
+			tnt.Eosd.Add(wordTag.GetTag(), 1)
+			tnt.Uni.Add(wordTag.GetTag(), 1)
+			tnt.Bi.Add(tupleStr, 1)
+			tnt.Tri.Add(strings.Join(now, "-"), 1)
+			if _, ok := tnt.Word[wordTag.GetWord()]; !ok {
+				tnt.Word[wordTag.GetWord()] = []string{}
 			}
-			if !Contains(tnt.word[wordTag.GetWord()], wordTag.GetTag()) {
-				tnt.word[wordTag.GetWord()] = append(tnt.word[wordTag.GetWord()], wordTag.GetTag())
+			if !Contains(tnt.Word[wordTag.GetWord()], wordTag.GetTag()) {
+				tnt.Word[wordTag.GetWord()] = append(tnt.Word[wordTag.GetWord()], wordTag.GetTag())
 			}
 			now = now[1:]
 		}
-		tnt.eos.Add(now[len(now)-1]+"-EOS", 1)
+		tnt.Eos.Add(now[len(now)-1]+"-EOS", 1)
 	}
 	var tl1, tl2, tl3 float64
-	for _, val := range tnt.tri.Samples() {
+	for _, val := range tnt.Tri.Samples() {
 		now = FromString(val)
-		c3 := tnt.tntDiv(tnt.tri.Get(val)-1, tnt.bi.Get(ToString(now[0:2]))-1)
-		c2 := tnt.tntDiv(tnt.bi.Get(ToString(now[1:]))-1, tnt.uni.Get(now[1])-1)
-		c1 := tnt.tntDiv(tnt.uni.Get(now[2])-1, tnt.uni.GetSum()-1)
-		result := tnt.tri.Get(ToString(now))
+		c3 := tnt.tntDiv(tnt.Tri.Get(val)-1, tnt.Bi.Get(ToString(now[0:2]))-1)
+		c2 := tnt.tntDiv(tnt.Bi.Get(ToString(now[1:]))-1, tnt.Uni.Get(now[1])-1)
+		c1 := tnt.tntDiv(tnt.Uni.Get(now[2])-1, tnt.Uni.GetSum()-1)
+		result := tnt.Tri.Get(ToString(now))
 		if c3 >= c1 && c3 >= c2 {
 			tl3 += result
 		} else if c2 >= c1 && c2 >= c3 {
@@ -107,11 +105,11 @@ func (tnt *TnT) Train(data *list.List) {
 		}
 	}
 
-	tnt.l1 = tl1 / (tl1 + tl2 + tl3)
-	tnt.l2 = tl2 / (tl1 + tl2 + tl3)
-	tnt.l3 = tl3 / (tl1 + tl2 + tl3)
+	tnt.L1 = tl1 / (tl1 + tl2 + tl3)
+	tnt.L2 = tl2 / (tl1 + tl2 + tl3)
+	tnt.L3 = tl3 / (tl1 + tl2 + tl3)
 	newStatus := &StringSet{make(map[string]bool)}
-	for _, val := range tnt.status {
+	for _, val := range tnt.Status {
 		newStatus.Add(val)
 	}
 	newStatus.Add("BOS")
@@ -120,14 +118,14 @@ func (tnt *TnT) Train(data *list.List) {
 	var tri float64
 	for key1, _ := range newStatus.set {
 		for key2, _ := range newStatus.set {
-			for _, val := range tnt.status {
+			for _, val := range tnt.Status {
 				if key1 == "BOS" && key2 == "BOS" && val == "s" {
 					//fmt.Println("aa")
 				}
-				uni = tnt.l1 * tnt.uni.Frequency(val)
-				bi = tnt.tntDiv(tnt.l2*tnt.bi.Get(key2+"-"+val), tnt.uni.Get(key2))
-				tri = tnt.tntDiv(tnt.l3*tnt.tri.Get(key1+"-"+key2+"-"+val), tnt.bi.Get(key1+"-"+key2))
-				tnt.trans[key1+"-"+key2+"-"+val] = math.Log(uni + bi + tri)
+				uni = tnt.L1 * tnt.Uni.Frequency(val)
+				bi = tnt.tntDiv(tnt.L2*tnt.Bi.Get(key2+"-"+val), tnt.Uni.Get(key2))
+				tri = tnt.tntDiv(tnt.L3*tnt.Tri.Get(key1+"-"+key2+"-"+val), tnt.Bi.Get(key1+"-"+key2))
+				tnt.Trans[key1+"-"+key2+"-"+val] = math.Log(uni + bi + tri)
 			}
 		}
 	}
@@ -141,14 +139,14 @@ func (tnt *TnT) Tag(data []string) []pojo.Result {
 
 	for _, ch := range data {
 		stage = make(map[string]pojo.StageValue)
-		samples := tnt.status
-		if val, ok := tnt.word[ch]; ok {
+		samples := tnt.Status
+		if val, ok := tnt.Word[ch]; ok {
 			samples = val
 		}
 		for _, s := range samples {
-			wd := math.Log(tnt.wd.Get(s+"-"+ch)) - math.Log(tnt.uni.Get(s))
+			wd := math.Log(tnt.Wd.Get(s+"-"+ch)) - math.Log(tnt.Uni.Get(s))
 			for _, tag := range tags {
-				p := tag.GetScore() + wd + tnt.trans[tag.GetPre().ToString()+"-"+s]
+				p := tag.GetScore() + wd + tnt.Trans[tag.GetPre().ToString()+"-"+s]
 				pre := pojo.Pre{tag.GetPre().GetTwo(), s}.ToString()
 				if sv, ok := stage[pre]; !ok || p > sv.GetScore() {
 					if tag.GetSuffix() == "" {
@@ -203,8 +201,6 @@ func (tnt *TnT) Tag(data []string) []pojo.Result {
 	}
 	results := []pojo.Result{}
 	tagArr := strings.Split(tags[0].GetSuffix(), "-")
-	log.Println("tagArr:", tagArr)
-	log.Println("data:", data)
 	if len(tagArr) != len(data) {
 		panic("出错了！")
 	}

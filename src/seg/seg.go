@@ -13,13 +13,14 @@ type Seg struct {
 	segger *util.TnT
 }
 
-func InitSeg() Seg {
+func InitSeg() *Seg {
 	segger := util.NewTnT(0)
-	segger.Load("seg.marshal")
-	return Seg{segger}
+	segger.Load("../seg/seg.marshal")
+	return &Seg{segger}
 }
 
 func (seg *Seg) Save(fname string) {
+	log.Println("save to ", fname)
 	seg.segger.Save(fname)
 }
 
@@ -57,6 +58,7 @@ func (seg *Seg) SegOne(sentence string) []string {
 	}
 	var oneres string
 	results := seg.segger.Tag(data)
+	log.Println(results)
 	for _, result := range results {
 		if result.GetCh() == "s" {
 			ret = append(ret, result.GetWord())
@@ -92,3 +94,10 @@ func (seg *Seg) Seg(sent string) []string {
 	}
 	return words
 }
+
+//func main() {
+//	seg := InitSeg()
+//	//seg.Train("data.txt") // 主要是用来放置一些简单快速的中文分词和词性标注的程序
+//	//seg.Save("seg1.marshal")
+//	log.Println(seg.Seg("这个东西真心很赞"))
+//}

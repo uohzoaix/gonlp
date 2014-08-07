@@ -58,7 +58,6 @@ func (seg *Seg) SegOne(sentence string) []string {
 	}
 	var oneres string
 	results := seg.segger.Tag(data)
-	log.Println(results)
 	for _, result := range results {
 		if result.GetCh() == "s" {
 			ret = append(ret, result.GetWord())
@@ -95,9 +94,9 @@ func (seg *Seg) Seg(sent string) []string {
 	return words
 }
 
-//func main() {
-//	seg := InitSeg()
-//	//seg.Train("data.txt") // 主要是用来放置一些简单快速的中文分词和词性标注的程序
-//	//seg.Save("seg1.marshal")
-//	log.Println(seg.Seg("这个东西真心很赞"))
-//}
+func main() {
+	seg := InitSeg()
+	//seg.Train("data.txt") // 主要是用来放置一些简单快速的中文分词和词性标注的程序
+	//seg.Save("seg1.marshal")
+	log.Println(seg.Seg("这个东西真心很赞"))
+}

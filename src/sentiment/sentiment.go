@@ -1,4 +1,4 @@
-package sentiment
+package main
 
 import (
 	"gonlp/classification"
@@ -17,12 +17,16 @@ type Sentiment struct {
 
 func InitSentiment() *Sentiment {
 	classifier := classification.InitBayes()
-	classifier.Load("sentiment.marshal")
+	//classifier.Load("sentiment.marshal")
 	return &Sentiment{classifier, normal.InitNormal(), seg.InitSeg()}
 }
 
 func (sentiment *Sentiment) Save(fname string) {
 	sentiment.Bayes.Save(fname)
+}
+
+func (sentiment *Sentiment) Load(fname string) {
+	sentiment.Bayes.Load(fname)
 }
 
 func (sentiment *Sentiment) Handle(doc string) []string {
@@ -51,7 +55,7 @@ func (sentiment *Sentiment) Train(negFile string, posFile string) {
 			posDocs = append(posDocs, line)
 		})
 		if err != nil {
-			log.Println("读取" + posFile + "出错")
+			log.Println("读取"+posFile+"出错", err)
 		}
 	}
 	data := []([]interface{}){}
@@ -62,8 +66,10 @@ func (sentiment *Sentiment) Train(negFile string, posFile string) {
 		arr[1] = "neg"
 		data = append(data, arr)
 	}
+	log.Println("pos")
 	for _, sent := range posDocs {
 		words := sentiment.Handle(sent)
+		log.Println(words)
 		arr := make([]interface{}, 2)
 		arr[0] = words
 		arr[1] = "pos"
@@ -78,4 +84,11 @@ func (sentiment *Sentiment) Classify(sent string) float64 {
 		return result.GetProb()
 	}
 	return 1 - result.GetProb()
+}
+
+func main() {
+	sentiment := InitSentiment()
+	sentiment.Train("neg.txt", "pos.txt")
+	sentiment.Save("sentiment.marshal")
+	sentiment.Load("sentiment.marshal")
 }

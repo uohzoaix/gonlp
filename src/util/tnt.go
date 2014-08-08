@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	//"fmt"
 	"gonlp/pojo"
-	//"log"
+	"log"
 	"math"
 	"sort"
 	"strings"
@@ -64,6 +64,7 @@ func (tnt *TnT) Train(data *list.List) {
 	now := []string{}
 	now = append(now, "BOS")
 	now = append(now, "BOS")
+	status := &StringSet{make(map[string]bool)}
 	for wtList := data.Front(); wtList != nil; wtList = wtList.Next() {
 		tnt.Bi.Add("BOS-BOS", 1)
 		tnt.Uni.Add("BOS", 2)
@@ -72,7 +73,8 @@ func (tnt *TnT) Train(data *list.List) {
 			wordTag := wt.Value.(pojo.WordTag)
 			now = append(now, wordTag.GetTag())
 			tupleStr := strings.Join(now[1:], "-")
-			tnt.Status = append(tnt.Status, wordTag.GetTag())
+			status.Add(wordTag.GetTag())
+			//tnt.Status = append(tnt.Status, wordTag.GetTag())
 			tnt.Wd.Add(wordTag.ToString(), 1)
 			tnt.Eos.Add(tupleStr, 1)
 			tnt.Eosd.Add(wordTag.GetTag(), 1)
@@ -108,16 +110,20 @@ func (tnt *TnT) Train(data *list.List) {
 	tnt.L1 = tl1 / (tl1 + tl2 + tl3)
 	tnt.L2 = tl2 / (tl1 + tl2 + tl3)
 	tnt.L3 = tl3 / (tl1 + tl2 + tl3)
-	newStatus := &StringSet{make(map[string]bool)}
-	for _, val := range tnt.Status {
-		newStatus.Add(val)
+	//newStatus := &StringSet{make(map[string]bool)}
+	for val, _ := range status.set {
+		tnt.Status = append(tnt.Status, val)
 	}
-	newStatus.Add("BOS")
+	//for _, val := range tnt.Status {
+	//	newStatus.Add(val)
+	//}
+	status.Add("BOS")
 	var uni float64
 	var bi float64
 	var tri float64
-	for key1, _ := range newStatus.set {
-		for key2, _ := range newStatus.set {
+	log.Println(tnt.Status)
+	for key1, _ := range status.set {
+		for key2, _ := range status.set {
 			for _, val := range tnt.Status {
 				if key1 == "BOS" && key2 == "BOS" && val == "s" {
 					//fmt.Println("aa")

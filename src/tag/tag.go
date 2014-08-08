@@ -15,7 +15,7 @@ type Tag struct {
 
 func InitTag() *Tag {
 	tnt := util.NewTnT(0)
-	tnt.Load("tag.marshal")
+	tnt.Load("../tag/tag.marshal")
 	return &Tag{tnt}
 }
 
@@ -58,3 +58,9 @@ func (tag *Tag) Tag(words []string) []string {
 func (tag *Tag) TagAll(words []string) []pojo.Result {
 	return tag.Tnt.Tag(words)
 }
+
+//func main() {
+//	tag := InitTag()
+//	tag.Train("199801.txt")
+//	tag.Save("tag.marshal")
+//}

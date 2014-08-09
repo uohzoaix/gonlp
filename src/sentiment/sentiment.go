@@ -1,4 +1,4 @@
-package main
+package sentiment
 
 import (
 	"gonlp/classification"
@@ -17,7 +17,7 @@ type Sentiment struct {
 
 func InitSentiment() *Sentiment {
 	classifier := classification.InitBayes()
-	//classifier.Load("sentiment.marshal")
+	classifier.Load("sentiment.marshal")
 	return &Sentiment{classifier, normal.InitNormal(), seg.InitSeg()}
 }
 
@@ -86,9 +86,9 @@ func (sentiment *Sentiment) Classify(sent string) float64 {
 	return 1 - result.GetProb()
 }
 
-func main() {
-	sentiment := InitSentiment()
-	sentiment.Train("neg.txt", "pos.txt")
-	sentiment.Save("sentiment.marshal")
-	sentiment.Load("sentiment.marshal")
-}
+//func main() {
+//	sentiment := InitSentiment()
+//	sentiment.Train("neg.txt", "pos.txt")
+//	sentiment.Save("sentiment.marshal")
+//	sentiment.Load("sentiment.marshal")
+//}

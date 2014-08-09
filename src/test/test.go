@@ -2,13 +2,16 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"container/list"
+	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"gonlp/pojo"
 	"gonlp/util"
 	"io"
+	"log"
 	"os"
 	"reflect"
 	"regexp"
@@ -152,6 +155,64 @@ func main() {
 	testsliceappend = append(testsliceappend, testappended...)
 	fmt.Println(testsliceappend)
 
+	fmt.Println(strings.Trim(" fdfd   fdfd   fdf ", " "))
+	fmt.Println(strings.SplitN(strings.Trim(" fdfd fdfd fdf ", " "), " ", 2)[1])
+
+	sentences := []string{}
+	delimiter := regexp.MustCompile("[，。？！；]")
+	for _, line := range strings.SplitN("dfd，fddd\r\nfdgf。gg\r\n", "\r\n", -1) {
+		fmt.Println(line)
+		line = strings.Trim(line, " ")
+		if line == "" {
+			continue
+		}
+		line = delimiter.ReplaceAllString(line, " ")
+		for _, sent := range regexp.MustCompile("[^\\s]+").FindAllString(line, -1) {
+			sent = strings.Trim(sent, " ")
+			fmt.Println(sent)
+			if sent == "" {
+				continue
+			}
+			sentences = append(sentences, sent)
+		}
+	}
+	fmt.Println(sentences)
+
+	ma := make(map[string]float64)
+	ma["aa"] = 0.1
+
+	tttt := &TTT{ma, "dd"}
+	log.Println(tttt)
+	log.Println(json.Marshal(tttt))
+
+	tnt := &util.TnT{10, 0.0, 0.0, 0.0, []string{}, util.InitAddOne(), util.InitAddOne(), util.InitAddOne(), util.InitNormal(), util.InitNormal(), util.InitNormal(), make(map[string]([]string)), nil}
+	log.Println(tnt)
+	log.Println(json.Marshal(tnt))
+	tnt.Save("1.marshal")
+	ttt := &Test{"aa", arr}
+	log.Println(json.Marshal(ttt))
+	log.Println(ttt)
+
+	bufs := new(bytes.Buffer)
+	var datas = []interface{}{
+		uint16(61374),
+		int8(-54),
+		uint8(254),
+	}
+	for _, v := range datas {
+		log.Println(v)
+		err := binary.Write(bufs, binary.LittleEndian, v)
+		if err != nil {
+			fmt.Println("binary.Write failed:", err)
+		}
+	}
+	log.Println(bufs.Bytes())
+
+}
+
+type TTT struct {
+	A map[string]float64
+	B string
 }
 
 func testfunc(bytes []byte, obj Test) (err error) {

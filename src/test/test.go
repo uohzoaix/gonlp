@@ -194,10 +194,10 @@ func main() {
 	log.Println(ttt)
 
 	bufs := new(bytes.Buffer)
-	var datas = []interface{}{
-		uint16(61374),
-		int8(-54),
-		uint8(254),
+	var datas = []byte{
+		47,
+		125,
+		125,
 	}
 	for _, v := range datas {
 		log.Println(v)
@@ -208,6 +208,34 @@ func main() {
 	}
 	log.Println(bufs.Bytes())
 
+	fout, err = os.Create("2.marshal")
+	defer fout.Close()
+	if err != nil {
+		return
+	}
+	fout.Write(bufs.Bytes())
+
+	fin, err = os.Open("2.marshal")
+	defer fin.Close()
+	var results, temps []byte
+	var begin int
+	buf = make([]byte, 2048*10000)
+	for {
+		num, _ := fin.Read(buf)
+		if 0 == num {
+			break
+		}
+		if len(results) > 0 {
+			temps = results
+			results = make([]byte, begin+num)
+			copy(results[0:len(temps)], temp[:])
+		} else {
+			results = make([]byte, num)
+		}
+		copy(results[begin:begin+num], buf[:num])
+		//os.Stdout.Write(buf[:num])
+	}
+	log.Println(results)
 }
 
 type TTT struct {

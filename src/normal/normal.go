@@ -12,8 +12,8 @@ type Normal struct {
 	Pinyin map[string]string
 }
 
-func InitNormal() Normal {
-	return Normal{initStop("stopwords.txt"), initPinyin("pinyin.txt")}
+func InitNormal() *Normal {
+	return &Normal{initStop("../normal/stopwords.txt"), initPinyin("../normal/pinyin.txt")}
 }
 
 func initStop(stopFile string) []string {
@@ -55,6 +55,7 @@ func (normal *Normal) FilterStop(words []string) []string {
 		for _, val := range normal.Stop {
 			if word == val {
 				find = true
+				break
 			}
 		}
 		if !find {

@@ -109,6 +109,7 @@ func bayesLoadToMem(result []byte, obj interface{}) {
 func GetReader(fileName string) (*os.File, *bufio.Reader) {
 	file, err := os.Open(fileName)
 	if err != nil {
+		log.Println(err)
 		return nil, nil
 	}
 	return file, bufio.NewReader(file)

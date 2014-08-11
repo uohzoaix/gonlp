@@ -17,7 +17,7 @@ type Sentiment struct {
 
 func InitSentiment() *Sentiment {
 	classifier := classification.InitBayes()
-	classifier.Load("sentiment.marshal")
+	classifier.Load("../sentiment/sentiment.marshal")
 	return &Sentiment{classifier, normal.InitNormal(), seg.InitSeg()}
 }
 
@@ -88,7 +88,7 @@ func (sentiment *Sentiment) Classify(sent string) float64 {
 
 //func main() {
 //	sentiment := InitSentiment()
-//	sentiment.Train("neg.txt", "pos.txt")
-//	sentiment.Save("sentiment.marshal")
-//	sentiment.Load("sentiment.marshal")
+//	sentiment.Train("neg1.txt", "pos1.txt")
+//	sentiment.Save("sentiment1.marshal")
+//	sentiment.Load("sentiment1.marshal")
 //}

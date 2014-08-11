@@ -46,7 +46,7 @@ func InitAddOne() *AddOne {
 	return &AddOne{Base{make(map[string]float64), 0.0, 1}}
 }
 
-func (addOne AddOne) Add(key string, value int) {
+func (addOne *AddOne) Add(key string, value int) {
 	addOne.Total += float64(value)
 	if !addOne.Exist(key) {
 		addOne.Data[key] = 1

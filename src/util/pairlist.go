@@ -20,6 +20,7 @@ func SortMapByValue(m map[string]float64) PairList {
 	i := 0
 	for k, v := range m {
 		p[i] = Pair{k, v}
+		i++
 	}
 	sort.Sort(p)
 	return p

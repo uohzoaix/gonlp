@@ -13,6 +13,7 @@ type ZH struct {
 
 func (zh *ZH) InitZH() {
 	zh.Zh2hans = make(map[string]string)
+	zh.initHans("../normal/zh2hans.txt")
 	for key, _ := range zh.Zh2hans {
 		if len(key) > zh.Maxl {
 			zh.Maxl = len(key)

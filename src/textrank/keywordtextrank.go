@@ -66,6 +66,7 @@ func (kwRank *KeyWordTextRank) Solve() {
 				break
 			}
 		}
+		break
 	}
 	kwRank.Top = util.SortMapByValue(kwRank.Vertex)
 }

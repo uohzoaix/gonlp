@@ -60,6 +60,7 @@ func (textRank *TextRank) Solve() {
 				break
 			}
 		}
+		break
 	}
 	result := make(map[string]float64)
 	for k, v := range textRank.Vertex {

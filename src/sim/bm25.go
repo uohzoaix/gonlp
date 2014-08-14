@@ -42,7 +42,7 @@ func InitBm25(docs []([]string)) *Bm25 {
 	for k, v := range df {
 		idf[k] = math.Log(float64(len(docs)-v)+0.5) - math.Log(float64(v)+0.5)
 	}
-	return &Bm25{len(docs), float64(sum * 1.0 / len(docs) * 1.0), docs, f, df, idf, 1.5, 0.75}
+	return &Bm25{len(docs), float64(sum) / float64(len(docs)), docs, f, df, idf, 1.5, 0.75}
 }
 
 func (bm25 *Bm25) GetF() [](map[string]int) {

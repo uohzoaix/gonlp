@@ -1,7 +1,7 @@
 package main
 
 import (
-	"gonlp"
+	"../"
 	"log"
 )
 
@@ -29,7 +29,8 @@ func main() {
 	test = append(test, test1)
 	test1 = []string{}
 	test1 = append(test1, "这个")
-	nlp = gonlp.InitNlp(test1)
+	test = append(test, test1)
+	nlp = gonlp.InitNlp(test)
 	log.Println(nlp.Tf())
 	log.Println(nlp.Idf())
 	test1 = []string{}
